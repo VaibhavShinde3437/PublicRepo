@@ -60,5 +60,4 @@ class QuestionView(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
     queryset = Question.objects.all()
 
-    def perform_create(self, serializer):
-        return serializer.save(assessment=)
+
