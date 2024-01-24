@@ -34,10 +34,10 @@ class AssessmentView(viewsets.ModelViewSet):
 
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            serializer.save(created_by=self.request.user, update_by=self.request.user)
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
-        return Response({'error' : "error postion"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(created_by=self.request.user, update_by=self.request.user)
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
+        
 
     @action(detail=True, methods=['GET','POST'], serializer_class=QuestionSerializer)
     def questions(self, request, pk):
@@ -48,10 +48,10 @@ class AssessmentView(viewsets.ModelViewSet):
         else:
             assess = self.get_object()
             serializer = self.get_serializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save(assessment=assess, created_by=self.request.user, update_by=self.request.user)
-                return Response(serializer.data,status=status.HTTP_201_CREATED)
-            return Response({'error' : "error postion"}, status=status.HTTP_400_BAD_REQUEST)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(assessment=assess, created_by=self.request.user, update_by=self.request.user)
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+            
 
 
 
