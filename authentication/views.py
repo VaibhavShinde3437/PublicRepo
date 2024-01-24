@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from rest_framework import generics,status,viewsets, permissions
-from rest_framework.decorators import action
 from .models import Assessment, Question, User
 from .serializer import AssessmentSerializer, QuestionSerializer, ResgisterSerializer, LoginSerializer
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 class RegisterView(generics.GenericAPIView):
     serializer_class = ResgisterSerializer
@@ -60,3 +60,5 @@ class QuestionView(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
     queryset = Question.objects.all()
 
+    def perform_create(self, serializer):
+        return serializer.save(assessment=)

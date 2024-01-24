@@ -49,9 +49,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Assessment(models.Model):
     title = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)
-    created_by = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='assessments_created')
-    update_by = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='assessments_updated')
+    description = models.TextField()
 
         
     def __str__(self):
@@ -69,9 +67,7 @@ class Question(models.Model):
     title = models.CharField(max_length=255)
     options = models.JSONField(default=list)
     question_type = models.CharField(max_length=20, choices=CHOICES)
-    description = models.TextField(blank=True, null=True)
-    created_by = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='questions_created')
-    update_by = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='questions_updated')
+    description = models.TextField()
 
     def __str__(self):
         return self.title
