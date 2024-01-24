@@ -63,7 +63,7 @@ class Question(models.Model):
         ('rating', 'Rating'),
     ]
 
-    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE)
+    assessment = models.ForeignKey(to=Assessment, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     options = models.JSONField(default=list)
     question_type = models.CharField(max_length=20, choices=CHOICES)
