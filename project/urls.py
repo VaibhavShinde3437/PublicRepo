@@ -22,4 +22,6 @@ from authentication import urls as auth_url
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(auth_url)),
+    
+  
 ]
