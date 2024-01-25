@@ -16,6 +16,16 @@ class RegisterView(generics.GenericAPIView):
         user = User.objects.get(email = userauth['email'])
         return Response(userauth, status=status.HTTP_201_CREATED)
     
+# class SuperUserRegisterView(generics.GenericAPIView):
+#     serializer_class = SuperUserRegistrationSerializer
+    
+#     def post(self, request):
+#         user = self.serializer_class(data=request.data)
+#         user.is_valid(raise_exception=True)
+#         user.save()
+#         userauth = user.data
+#         return Response(userauth, status=status.HTTP_201_CREATED)
+    
 
 class LoginView(generics.GenericAPIView):
     serializer_class=LoginSerializer
@@ -33,10 +43,12 @@ class AssessmentView(viewsets.ModelViewSet):
 
 
     def create(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(created_by=self.request.user, update_by=self.request.user)
-        return Response(serializer.data,status=status.HTTP_201_CREATED)
+        if self.request.user.is_superuser:
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(created_by=self.request.user, update_by=self.request.user)
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response({"error" : "Only Admin can create Assessments"})
         
 
     @action(detail=True, methods=['GET','POST'], serializer_class=QuestionSerializer)
@@ -46,11 +58,13 @@ class AssessmentView(viewsets.ModelViewSet):
             serializer = self.get_serializer(ques, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            assess = self.get_object()
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save(assessment=assess, created_by=self.request.user, update_by=self.request.user)
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
+            if self.request.user.is_superuser:
+                assess = self.get_object()
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save(assessment=assess, created_by=self.request.user, update_by=self.request.user)
+                return Response(serializer.data,status=status.HTTP_201_CREATED)
+            return Response({"error" : "Only Admin can create Questions"})
             
 
 
