@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics,status,viewsets, permissions
 from .models import Assessment, Question, User
+from .permission import SuperuserPermission
 from .serializer import AssessmentSerializer, QuestionSerializer, ResgisterSerializer, LoginSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -38,12 +39,12 @@ class LoginView(generics.GenericAPIView):
 
 class AssessmentView(viewsets.ModelViewSet):
     serializer_class = AssessmentSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, SuperuserPermission)
     queryset = Assessment.objects.all()
 
 
     def create(self, request):
-        if self.request.user.is_superuser:
+        if SuperuserPermission.has_permission(self, request):
             serializer = self.serializer_class(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save(created_by=self.request.user, update_by=self.request.user)
@@ -58,7 +59,7 @@ class AssessmentView(viewsets.ModelViewSet):
             serializer = self.get_serializer(ques, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            if self.request.user.is_superuser:
+            if SuperuserPermission.has_permission(self, request):
                 assess = self.get_object()
                 serializer = self.get_serializer(data=request.data)
                 serializer.is_valid(raise_exception=True)
