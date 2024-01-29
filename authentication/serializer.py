@@ -1,4 +1,4 @@
-from .models import Assessment, Question, User
+from .models import Assessment, Question, User, Assign, Submit
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib import auth
@@ -75,3 +75,13 @@ class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ['id', 'title', 'description', 'question_type', 'options']
+
+class AssignSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Assign
+        fields = "__all__"
+
+class SubmitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Submit
+        fields = "__all__"
