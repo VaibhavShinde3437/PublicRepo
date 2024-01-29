@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from .views import AssessmentView, QuestionView, RegisterView, LoginView, AssessmentAssignView, SubmittedAssessmentView
+from .views import AssessmentView, QuestionView, RegisterView, LoginView, AssignView, SubmitView
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
@@ -11,10 +11,10 @@ router2 = DefaultRouter()
 router2.register(r'questions', QuestionView, basename='que')
 
 router3 = DefaultRouter()
-router3.register(r'assign-assessments', AssessmentAssignView, basename='assign-assessments')
+router3.register(r'assign-assessments', AssignView, basename='assign-assessments')
 
 router4 = DefaultRouter()
-router4.register(r'submitted-assessments', SubmittedAssessmentView, basename='submitted-assessments')
+router4.register(r'submitted-assessments', SubmitView, basename='submitted-assessments')
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),

@@ -77,18 +77,25 @@ class Question(models.Model):
 
     def __str__(self):
         return self.title
-
-class AssessmentAssign(models.Model):
+    
+class BaseModel(models.Model):
     user_id = models.ForeignKey(to=User, on_delete=models.CASCADE)
     assess_id = models.ForeignKey(to=Assessment, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return self.user_id
-    
-class SubmittedAssessment(models.Model):
-    user_id = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='user_submitted')
-    assess_id = models.ForeignKey(to=Assessment, on_delete=models.CASCADE, related_name='assement_submitted')
+    class Meta:
+        abstract = True
 
     def __str__(self):
         return self.user_id
+
+
+class Assign(BaseModel):
+    class Meta:
+        ordering = ['user_id']
+
+    
+    
+class Submit(BaseModel):
+    class Meta:
+        ordering = ['user_id']
 

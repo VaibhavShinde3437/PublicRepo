@@ -1,16 +1,20 @@
 from django.shortcuts import render
 from rest_framework import generics,status,viewsets, permissions
-from .models import Assessment, Question, User, AssessmentAssign, SubmittedAssessment
+from .models import Assessment, Question, User, Assign, Submit
 from .permission import SuperuserPermission
-from .serializer import AssessmentSerializer, QuestionSerializer, ResgisterSerializer, LoginSerializer, AssessmentAssignSerializer, SubmittedAssessmentSerializer
+from .serializer import AssessmentSerializer, QuestionSerializer, ResgisterSerializer, LoginSerializer, AssignSerializer, SubmitSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.core.mail import send_mail
 from project import settings
+from django.db import transaction
+
 
 class RegisterView(generics.GenericAPIView):
     serializer_class = ResgisterSerializer
+
     
+    @transaction.atomic
     def post(self, request):
         user = self.serializer_class(data=request.data)
         user.is_valid(raise_exception=True)
@@ -34,7 +38,7 @@ class AssessmentView(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, SuperuserPermission)
     queryset = Assessment.objects.all()
 
-
+    @transaction.atomic
     def create(self, request):
         if SuperuserPermission.has_permission(self, request):
             serializer = self.serializer_class(data=request.data)
@@ -42,7 +46,10 @@ class AssessmentView(viewsets.ModelViewSet):
             serializer.save(created_by=self.request.user, update_by=self.request.user)
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response({"error" : "Only Admin can create Assessments"})
-        
+
+    @transaction.atomic 
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
 
     @action(detail=True, methods=['GET','POST'], serializer_class=QuestionSerializer)
     def questions(self, request, pk):
@@ -67,15 +74,16 @@ class QuestionView(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
     queryset = Question.objects.all()
 
-class AssessmentAssignView(viewsets.ModelViewSet):
-    serializer_class=AssessmentAssignSerializer
+class AssignView(viewsets.ModelViewSet):
+    serializer_class=AssignSerializer
     permission_classes = (permissions.IsAuthenticated,)
     queryset = Assessment.objects.all()
 
+    @transaction.atomic
     def create(self, request):
         if SuperuserPermission.has_permission(self, request):
             input = request.data
-            data = AssessmentAssign.objects.filter(**input).exists()
+            data = Assign.objects.filter(**input).exists()
             user_data = ResgisterSerializer(User.objects.get(id=input.get('user_id')))
             email = user_data.data.get("email")
             if not data:
@@ -90,24 +98,25 @@ class AssessmentAssignView(viewsets.ModelViewSet):
         
     def list(self, request):
         if SuperuserPermission.has_permission(self, request):
-            assess = AssessmentAssign.objects.values('assess_id')
-            result = Assessment.objects.filter(id__in=assess)
-            serializer = AssessmentSerializer(result, many=True)
+            assessments = Assign.objects.values('assess_id')
+            records = Assessment.objects.filter(id__in=assessments)
+            serializer = AssessmentSerializer(records, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        assess = AssessmentAssign.objects.filter(user_id=self.request.user.id).values('assess_id')
-        result = Assessment.objects.filter(id__in=assess)
-        serializer = AssessmentSerializer(result, many=True)
+        assessments = Assign.objects.filter(user_id=self.request.user.id).values('assess_id')
+        records = Assessment.objects.filter(id__in=assessments)
+        serializer = AssessmentSerializer(records, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class SubmittedAssessmentView(viewsets.ModelViewSet):
-    serializer_class = SubmittedAssessmentSerializer
+class SubmitView(viewsets.ModelViewSet):
+    serializer_class = SubmitSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    queryset = SubmittedAssessment.objects.all()
+    queryset = Submit.objects.all()
 
+    @transaction.atomic
     def create(self, request):
         input = request.data
-        data = AssessmentAssign.objects.filter(**input)
+        data = Assign.objects.filter(**input)
         user_data = ResgisterSerializer(User.objects.get(id=input.get('user_id')))
         email = user_data.data.get("email")
         if str(self.request.user.id) == request.data.get('user_id'):
@@ -123,12 +132,12 @@ class SubmittedAssessmentView(viewsets.ModelViewSet):
     
     def list(self, request):
         if SuperuserPermission.has_permission(self, request):
-            assess = SubmittedAssessment.objects.values('assess_id')
-            result = Assessment.objects.filter(id__in=assess)
-            serializer = AssessmentSerializer(result, many=True)
+            assessments = Submit.objects.values('assess_id')
+            records = Assessment.objects.filter(id__in=assessments)
+            serializer = AssessmentSerializer(records, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        assess = SubmittedAssessment.objects.filter(user_id=self.request.user.id).values('assess_id')
-        result = Assessment.objects.filter(id__in=assess)
-        serializer = AssessmentSerializer(result, many=True)
+        assessments = Submit.objects.filter(user_id=self.request.user.id).values('assess_id')
+        records = Assessment.objects.filter(id__in=assessments)
+        serializer = AssessmentSerializer(records, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
