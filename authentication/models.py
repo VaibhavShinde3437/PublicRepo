@@ -55,7 +55,7 @@ class Assessment(models.Model):
     created_by=models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='assessment_created')
     update_by=models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='assessment_update')
 
-        
+
     def __str__(self):
         return self.title
     
@@ -78,4 +78,17 @@ class Question(models.Model):
     def __str__(self):
         return self.title
 
+class AssessmentAssign(models.Model):
+    user_id = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    assess_id = models.ForeignKey(to=Assessment, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.user_id
+    
+class SubmittedAssessment(models.Model):
+    user_id = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='user_submitted')
+    assess_id = models.ForeignKey(to=Assessment, on_delete=models.CASCADE, related_name='assement_submitted')
+
+    def __str__(self):
+        return self.user_id
 
